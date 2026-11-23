@@ -249,17 +249,18 @@ class OpenAIProvider(LLMProvider):
                         except Exception:
                             continue
 
+                        chunk_usage = None
+                        if "usage" in chunk_data and chunk_data["usage"]:
+                            u = chunk_data["usage"]
+                            chunk_usage = TokenUsage.compute(
+                                u.get("prompt_tokens", 0),
+                                u.get("completion_tokens", 0),
+                            )
+
                         choices = chunk_data.get("choices", [])
                         if not choices:
-                            # Might be final usage chunk
-                            if "usage" in chunk_data and chunk_data["usage"]:
-                                u = chunk_data["usage"]
-                                yield StreamChunk(
-                                    usage=TokenUsage.compute(
-                                        u.get("prompt_tokens", 0),
-                                        u.get("completion_tokens", 0),
-                                    )
-                                )
+                            if chunk_usage:
+                                yield StreamChunk(usage=chunk_usage)
                             continue
 
                         delta = choices[0].get("delta", {})
@@ -312,6 +313,7 @@ class OpenAIProvider(LLMProvider):
                             delta_text=delta_text,
                             delta_tool_calls=delta_tools,
                             finish_reason=finish_reason,
+                            usage=chunk_usage,
                         )
             except httpx.HTTPStatusError as exc:
                 self._handle_error(exc)

@@ -55,7 +55,7 @@ SECRET_PATTERNS: list[tuple[Pattern[str], str]] = [
     # Export assignments in shell / .env: export KEY=val
     (
         re.compile(
-            r'(?i)^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*(?:SECRET|KEY|TOKEN|PASSWORD|PASS))\s*=\s*(?!\[REDACTED)(["\']?[^\s"\']{6,}["\']?)',
+            r'(?i)^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*(?:SECRET|KEY|TOKEN|PASSWORD|PASS))\s*=\s*(?!["\']?\[REDACTED)(["\']?[^\s"\']{6,}["\']?)',
             re.MULTILINE,
         ),
         r"\1=[REDACTED_SECRET]",

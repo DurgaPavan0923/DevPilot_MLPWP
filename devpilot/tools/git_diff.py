@@ -25,17 +25,25 @@ class GitDiffTool(Tool):
     async def execute(
         self, path: str | None = None, staged: bool = False, **kwargs: Any
     ) -> ToolResult:
-        cmd_parts = ["git", "diff"]
+        cmd_args = ["git", "diff"]
         if staged:
-            cmd_parts.append("--staged")
+            cmd_args.append("--staged")
         if path:
-            safe_target = self.sandbox.resolve_safe_path(path)
-            cmd_parts.append(safe_target.relative_to(self.sandbox.repo_root).as_posix())
+            try:
+                safe_target = self.sandbox.resolve_safe_path(path)
+            except Exception as exc:
+                return ToolResult(
+                    ok=False,
+                    output=f"Permission denied: {exc}",
+                    error_type=ErrorTypeEnum.PERMISSION,
+                    exit_code=1,
+                )
+            cmd_args.append("--")
+            cmd_args.append(safe_target.relative_to(self.sandbox.repo_root).as_posix())
 
-        cmd = " ".join(cmd_parts)
         try:
-            process = await asyncio.create_subprocess_shell(
-                cmd,
+            process = await asyncio.create_subprocess_exec(
+                *cmd_args,
                 cwd=str(self.sandbox.repo_root),
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,

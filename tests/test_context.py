@@ -283,3 +283,16 @@ async def test_adaptive_hybrid_beats_single_modalities_on_recall():
     assert recall_hybrid == 1.0
     assert recall_hybrid > recall_bm25_top1
     assert recall_hybrid > recall_dense_top1
+
+
+@pytest.mark.neural
+def test_neural_dense_retrieval_opt_in(sample_chunks: list[CodeChunk]) -> None:
+    """Opt-in neural test verifying sentence-transformers when explicitly enabled."""
+    import os
+
+    if os.environ.get("DEVPILOT_RUN_NEURAL_TESTS") != "1":
+        pytest.skip("Skipped: set DEVPILOT_RUN_NEURAL_TESTS=1 to run neural model tests")
+
+    retriever = DenseSemanticRetriever(sample_chunks)
+    scores = retriever.score("verify jwt token")
+    assert len(scores) == len(sample_chunks)

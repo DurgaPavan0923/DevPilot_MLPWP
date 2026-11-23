@@ -27,9 +27,10 @@ class OllamaProvider(LLMProvider):
         model: str = "deepseek-coder:6.7b",
         base_url: str = "http://localhost:11434",
         timeout_sec: float = 120.0,
+        api_key: str | None = None,
         **kwargs: Any,
     ) -> None:
-        super().__init__(model=model, api_key=None, **kwargs)
+        super().__init__(model=model, api_key=api_key, **kwargs)
         self.base_url = base_url.rstrip("/")
         self.timeout_sec = timeout_sec
 

@@ -2,8 +2,21 @@
 
 import pytest
 
+import devpilot.context.dense
 from devpilot.llm.adapters.mock import MockProvider
 from devpilot.llm.base import Message, ToolDefinition
+
+
+@pytest.fixture(autouse=True)
+def disable_neural_dense_by_default(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Disable neural sentence-transformers by default to avoid downloading models in CI.
+
+    Tests marked with @pytest.mark.neural retain the neural backend setting.
+    """
+    if "neural" not in request.keywords:
+        monkeypatch.setattr(devpilot.context.dense, "_HAS_SENTENCE_TRANSFORMERS", False)
 
 
 @pytest.fixture

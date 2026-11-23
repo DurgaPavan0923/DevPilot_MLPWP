@@ -5,6 +5,7 @@ from pathlib import Path
 
 
 class TestFramework(StrEnum):
+    __test__ = False
     PYTEST = "pytest"
     UNITTEST = "unittest"
     JEST = "jest"

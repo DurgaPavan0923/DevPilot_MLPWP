@@ -204,6 +204,16 @@ def test_secret_redaction_comprehensive():
     assert "[REDACTED_PASSWORD]" in redacted
     assert "[REDACTED_PRIVATE_KEY]" in redacted
 
+    # Idempotency check: redacting an already-redacted text must not alter it
+    double_redacted = SecretRedactor.redact(redacted)
+    assert double_redacted == redacted
+
+    # Specifically test export assignments and repeated redactions
+    env_sample = "export DB_PASSWORD=\"SuperSecret12345\"\nexport API_KEY='secret-key-12345'"
+    redacted_env = SecretRedactor.redact(env_sample)
+    assert "SuperSecret12345" not in redacted_env
+    assert SecretRedactor.redact(redacted_env) == redacted_env
+
 
 def test_permission_modes_complete_matrix():
     # 1. READ_ONLY Mode: blocks all edits, deletes, and commands

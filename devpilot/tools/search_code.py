@@ -64,9 +64,10 @@ class SearchCodeTool(Tool):
         for fpath in search_files:
             if not fpath.is_file():
                 continue
+            rel_parts = fpath.relative_to(self.sandbox.repo_root).parts
             if any(
                 part.startswith((".", "__pycache__", "node_modules", "dist", "build"))
-                for part in fpath.parts
+                for part in rel_parts
             ):
                 continue
 
