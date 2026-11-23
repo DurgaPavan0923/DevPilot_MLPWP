@@ -1,0 +1,26 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    python3 \
+    python3-pip \
+    python3-venv \
+    nodejs \
+    npm \
+    git \
+    curl \
+    jq \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add unprivileged runner user
+RUN useradd -m -s /bin/bash devpilot && \
+    mkdir -p /workspace && \
+    chown -R devpilot:devpilot /workspace
+
+USER devpilot
+WORKDIR /workspace
+
+CMD ["/bin/bash"]
