@@ -1,38 +1,113 @@
-"""One-command reproduction script for DevPilot IEEE research paper benchmarks.
+"""Reproduction script for DevPilot comparative evaluation benchmarks.
 
-Runs comparative evaluation on the 10-task benchmark suite across all 3 agent
-configurations (Basic, Fixed-RAG, Full DevPilot), computes McNemar hypothesis
-testing and non-parametric bootstrap confidence intervals, exports LaTeX tables
-and SVG figures, and verifies empirical consistency.
+Runs comparative evaluation on benchmark suites across agent configurations
+(Basic, Fixed-RAG, Full DevPilot), computes McNemar hypothesis tests and
+non-parametric bootstrap confidence intervals, and exports LaTeX tables, CSV dumps,
+and tradeoff figures.
 """
 
 from __future__ import annotations
 
+import argparse
 import asyncio
+import os
 import sys
 from pathlib import Path
+from typing import Any
 
+from devpilot.config import get_settings
 from devpilot.core.logging import get_logger
 from devpilot.core.types import AgentConfigPreset
+from devpilot.llm.factory import create_provider
 from eval.dataset import TaskSuiteLoader
-from eval.export import BenchmarkExporter
+from eval.export import export_csv, export_latex_table, generate_evaluation_figures
 from eval.runner import ExperimentRunner
-from eval.statistics import HypothesisTestingEngine
 
 logger = get_logger("devpilot.scripts.reproduce")
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="DevPilot Comparative Evaluation and Reproduction Harness"
+    )
+    parser.add_argument(
+        "--provider",
+        type=str,
+        default=os.getenv("DEVPILOT_PROVIDER", None),
+        help="LLM provider name (e.g., 'deepseek', 'openai', 'anthropic', 'ollama', 'mock').",
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default=os.getenv("DEVPILOT_MODEL", None),
+        help="Model identifier (e.g., 'deepseek-coder', 'gpt-4o', 'claude-3-5-sonnet').",
+    )
+    parser.add_argument(
+        "--seeds",
+        type=str,
+        default="42,137,2026",
+        help="Comma-separated random seeds for multi-seed replication (default: '42,137,2026').",
+    )
+    parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=4,
+        help="Maximum concurrent evaluation task workers (default: 4).",
+    )
+    parser.add_argument(
+        "--allow-mock",
+        action="store_true",
+        help="Explicitly permit execution with MockProvider for harness validation and pipeline testing.",
+    )
+    parser.add_argument(
+        "--results-dir",
+        type=Path,
+        default=Path("eval/results"),
+        help="Directory to save evaluation reports and export artifacts (default: eval/results).",
+    )
+    return parser.parse_args()
+
+
 async def main() -> int:
+    args = parse_args()
+    settings = get_settings()
+
+    provider_name = (args.provider or settings.llm.default_provider).lower().strip()
+    model_name = args.model or settings.llm.default_model
+
     print("=" * 76)
     print(" DevPilot: Autonomous Coding Agent Harness — Reproduction Suite")
     print("=" * 76)
+    print(f"Target LLM Provider: {provider_name} (model: {model_name})")
+
+    # Safety gate against claiming mock test results as real research findings
+    if provider_name == "mock" and not args.allow_mock:
+        print("\n" + "!" * 76)
+        print(" [SAFETY BLOCK] Mock provider detected ('mock').")
+        print(" Running evaluation with MockProvider tests harness mechanics and event flow,")
+        print(" but does NOT perform real neural code generation, reasoning, or debugging.")
+        print()
+        print(" To run empirical research evaluations against real models:")
+        print("     python scripts/reproduce.py --provider deepseek --model deepseek-coder")
+        print("     python scripts/reproduce.py --provider openai --model gpt-4o")
+        print(" or configure DEVPILOT_PROVIDER and DEVPILOT_MODEL in your environment.")
+        print()
+        print(" To run a pipeline smoke test with the mock provider anyway, pass '--allow-mock'.")
+        print("!" * 76 + "\n")
+        return 1
+
+    try:
+        seeds = [int(s.strip()) for s in args.seeds.split(",") if s.strip()]
+    except ValueError:
+        print(f"Error: Invalid seeds specification: {args.seeds}")
+        return 1
 
     workspace_dir = Path("eval_repos")
-    results_dir = Path("eval/results")
+    results_dir = args.results_dir
     results_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Load benchmark suite
-    print("[1/4] Loading benchmark dataset (SWE-bench task subset)...")
+    print(f"\n[1/4] Loading benchmark dataset (Builtin task suite, seeds={seeds})...")
     tasks = TaskSuiteLoader.load_builtin_tasks()
     print(f"      Loaded {len(tasks)} isolated evaluation tasks with failing tests.")
 
@@ -42,68 +117,80 @@ async def main() -> int:
         AgentConfigPreset.FIXED_RAG,
         AgentConfigPreset.FULL,
     ]
-    seeds = [42, 137, 2026]
-    print(f"[2/4] Executing comparative experiment across {len(presets)} presets with seeds {seeds}...")
+    print(f"[2/4] Executing comparative experiment across {len(presets)} presets...")
+    if provider_name == "mock":
+        print("      (NOTE: Running in MOCK mode with --allow-mock. Measurements are simulated.)")
+
+    llm_instance = create_provider(provider_name=provider_name, model=model_name)
 
     runner = ExperimentRunner(
         workspace_dir=workspace_dir,
         results_dir=results_dir,
+        llm=llm_instance,
         seeds=seeds,
-        max_concurrency=4,
+        max_concurrency=args.concurrency,
     )
 
-    report = await runner.run_comparative_experiment(tasks=tasks, presets=presets)
+    report: dict[str, Any] = await runner.run_comparative_experiment(tasks=tasks, presets=presets)
 
-    # 3. Export IEEE LaTeX tables, CSV dumps, and SVG tradeoff figures
+    # 3. Export publication artifacts
     print("[3/4] Exporting publication artifacts (LaTeX tables, CSV, SVGs)...")
     latex_path = results_dir / "ieee_results_table.tex"
     csv_path = results_dir / "results_summary.csv"
-    svg_resolve_path = results_dir / "resolve_rate_comparison.svg"
-    svg_tradeoff_path = results_dir / "precision_recall_tradeoff.svg"
 
-    latex_content = BenchmarkExporter.export_latex_table(report)
+    latex_content = export_latex_table(report)
     latex_path.write_text(latex_content, encoding="utf-8")
 
-    csv_content = BenchmarkExporter.export_csv(report)
+    csv_content = export_csv(report)
     csv_path.write_text(csv_content, encoding="utf-8")
 
-    BenchmarkExporter.export_svg_chart(report, svg_resolve_path)
-    BenchmarkExporter.export_precision_recall_svg(svg_tradeoff_path)
+    generated_svgs = generate_evaluation_figures(report, results_dir)
 
     print(f"      -> LaTeX Table: {latex_path}")
     print(f"      -> CSV Dump:    {csv_path}")
-    print(f"      -> SVG Figures: {svg_resolve_path}, {svg_tradeoff_path}")
+    for svg_f in generated_svgs:
+        print(f"      -> SVG Figure:  {svg_f}")
 
-    # 4. Statistical Verification & Hypothesis Testing
-    print("[4/4] Verifying statistical significance and paper claims...")
-    basic_res = next(s for s in report.preset_summaries if s.preset == AgentConfigPreset.BASIC.value)
-    fixed_res = next(s for s in report.preset_summaries if s.preset == AgentConfigPreset.FIXED_RAG.value)
-    full_res = next(s for s in report.preset_summaries if s.preset == AgentConfigPreset.FULL.value)
+    # 4. Statistical Verification & Hypothesis Testing Reporting
+    print("\n[4/4] Empirical Measurement Summary:")
+    configs = report.get("configs", {})
+    for p_key, p_data in configs.items():
+        pass_rate = p_data.get("test_pass_rate", 0.0) * 100.0
+        comp_rate = p_data.get("completion_rate", 0.0) * 100.0
+        avg_tokens = p_data.get("avg_tokens", 0.0)
+        avg_cost = p_data.get("avg_cost_usd", 0.0)
+        avg_dur = p_data.get("avg_duration_sec", 0.0)
+        print(
+            f"  - {p_key:<20}: "
+            f"Pass Rate: {pass_rate:.1f}% | "
+            f"Completion: {comp_rate:.1f}% | "
+            f"Mean Tokens: {avg_tokens:.0f} | "
+            f"Mean Cost: ${avg_cost:.4f} | "
+            f"Mean Time: {avg_dur:.1f}s"
+        )
 
-    print("\nBenchmark Empirical Results Summary:")
-    print(f"  - Basic (No Harness):       {basic_res.resolve_rate * 100:.1f}% ({basic_res.resolved_tasks}/{basic_res.total_trials}) | Mean Tokens: {basic_res.mean_tokens:.0f}")
-    print(f"  - Fixed-RAG (Top-5):        {fixed_res.resolve_rate * 100:.1f}% ({fixed_res.resolved_tasks}/{fixed_res.total_trials}) | Mean Tokens: {fixed_res.mean_tokens:.0f}")
-    print(f"  - Full DevPilot (Proposed): {full_res.resolve_rate * 100:.1f}% ({full_res.resolved_tasks}/{full_res.total_trials}) | Mean Tokens: {full_res.mean_tokens:.0f}")
-
-    if report.mcnemar_tests:
-        stat_test = report.mcnemar_tests[0]
-        print(f"\nMcNemar Test ({stat_test.comparison}):")
-        print(f"  p-value:              {stat_test.p_value:.4f}")
-        print(f"  Significant (alpha):  {stat_test.is_significant} (alpha=0.05)")
-        print(f"  Contingency Table:    Both={stat_test.contingency_table.both_pass}, Full-Only={stat_test.contingency_table.b_only}, Other-Only={stat_test.contingency_table.a_only}, Neither={stat_test.contingency_table.neither}")
-
-    if report.bootstrap_cis:
-        bs_ci = report.bootstrap_cis[0]
-        print(f"  95% Bootstrap CI:     [{bs_ci.ci_lower * 100:+.1f}%, {bs_ci.ci_upper * 100:+.1f}%]")
-
-    # Consistency assertion
-    assert full_res.resolve_rate >= fixed_res.resolve_rate, (
-        f"Validation failed: Full DevPilot resolve rate ({full_res.resolve_rate}) "
-        f"lower than Fixed-RAG ({fixed_res.resolve_rate})"
-    )
+    stat_comps = report.get("statistical_comparisons", {})
+    if stat_comps:
+        print("\nStatistical Significance Tests:")
+        for comp_name, comp_data in stat_comps.items():
+            p_val = comp_data.get("p_value", 1.0)
+            p_adj = comp_data.get("p_value_adjusted", p_val)
+            is_sig = comp_data.get("is_significant_nominal", False)
+            table = comp_data.get("contingency_table", {})
+            print(f"  - {comp_name}:")
+            print(f"      p-value (raw):      {p_val:.4f}")
+            print(f"      p-value (adjusted): {p_adj:.4f}")
+            print(f"      Nominal Sig (a=0.05): {is_sig}")
+            print(f"      Contingency Table:  {table}")
 
     print("\n" + "=" * 76)
-    print(" [PASSED] Reproduction complete. All empirical paper findings confirmed.")
+    if provider_name == "mock":
+        print(" [COMPLETE] Mock pipeline test completed successfully.")
+        print(
+            "            Official empirical findings require execution with real LLM credentials."
+        )
+    else:
+        print(" [COMPLETE] Reproduction run finished. Artifacts saved to eval/results.")
     print("=" * 76)
     return 0
 
