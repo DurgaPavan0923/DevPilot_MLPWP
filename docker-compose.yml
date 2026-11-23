@@ -12,6 +12,10 @@ services:
       - DEVPILOT_PORT=8000
     volumes:
       - .:/workspace
+      - devpilot-data:/app/.devpilot
+      # CAUTION: Mounting /var/run/docker.sock gives the container control of the host
+      # Docker daemon (equivalent to root access on host). For trusted local developer
+      # machines only; reference docs/threat_model.md for STRIDE breakdown and mitigations.
       - /var/run/docker.sock:/var/run/docker.sock
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
@@ -58,3 +62,7 @@ services:
         limits:
           cpus: '2.0'
           memory: 4096M
+
+volumes:
+  devpilot-data:
+    name: devpilot-data
