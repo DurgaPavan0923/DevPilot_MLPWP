@@ -46,33 +46,50 @@ export default function EvalLabPage() {
   };
 
   const handleDownloadLatex = () => {
+    const rows = evalData.presets
+      .map(
+        (p) =>
+          `${p.preset} & ${(p.resolve_rate * 100).toFixed(1)}\\% & ${p.resolved_count}/${p.total_count} & ${p.mean_tokens.toLocaleString()} & \\$${p.mean_cost_usd.toFixed(4)} & ${p.mean_duration_sec.toFixed(1)} \\\\`
+      )
+      .join("\n");
     const latex = `\\begin{table*}[t]
-\\caption{Comparative Performance of Agent Configurations across 10 SWE-bench Tasks (3 Seeds, $N=30$)}
+\\caption{Comparative Performance of Agent Configurations (Evaluation Benchmark Run)}
 \\label{tab:comparative_results}
 \\centering
 \\begin{tabular}{lcccccc}
 \\hline
 Configuration & Resolve Rate & Resolved/Total & Mean Tokens & Mean Cost (\\$) & Mean Time (s) \\\\
 \\hline
-Full DevPilot & \\textbf{83.3\\%} & 25/30 & 38,420 & \\$0.0142 & 28.5 \\\\
-Fixed-RAG (Top-5) & 63.3\\% & 19/30 & 49,100 & \\$0.0215 & 41.2 \\\\
-Basic (No Harness) & 40.0\\% & 12/30 & 18,400 & \\$0.0089 & 19.8 \\\\
+${rows}
 \\hline
 \\end{tabular}
 \\end{table*}`;
-    downloadFile("devpilot_ieee_table.tex", latex, "text/plain");
+    downloadFile("devpilot_evaluation_table.tex", latex, "text/plain");
   };
 
   const handleDownloadCSV = () => {
-    const csv = `Configuration,ResolveRate,Resolved,Total,MeanTokens,MeanCostUSD,MeanDurationSec
-Full DevPilot,0.833,25,30,38420,0.0142,28.5
-Fixed-RAG,0.633,19,30,49100,0.0215,41.2
-Basic,0.400,12,30,18400,0.0089,19.8`;
+    const rows = evalData.presets
+      .map(
+        (p) =>
+          `"${p.preset}",${p.resolve_rate.toFixed(3)},${p.resolved_count},${p.total_count},${p.mean_tokens},${p.mean_cost_usd.toFixed(4)},${p.mean_duration_sec.toFixed(1)}`
+      )
+      .join("\n");
+    const csv = `Configuration,ResolveRate,Resolved,Total,MeanTokens,MeanCostUSD,MeanDurationSec\n${rows}`;
     downloadFile("devpilot_results.csv", csv, "text/csv");
   };
 
   return (
     <div className="space-y-8">
+      {/* Demo Mock Data Notice */}
+      <div className="rounded-xl border border-amber-600/40 bg-amber-950/20 p-4 shadow-sm flex items-start space-x-3">
+        <span className="rounded bg-amber-900/60 border border-amber-700 px-2 py-0.5 text-[11px] font-bold text-amber-300 uppercase tracking-wider shrink-0 mt-0.5">
+          DEMO DATA
+        </span>
+        <div className="text-xs text-amber-200/90 leading-relaxed">
+          <strong className="text-white">Simulated Baseline Evaluation:</strong> The metrics, task matrix, and hypothesis test values displayed here represent baseline mock data for dashboard demonstration and UI verification. Real experimental benchmarks for publication should be executed against frontier or open-weight models via <code className="rounded bg-black/40 px-1 py-0.5 font-mono text-amber-300">devpilot eval run --model &lt;model&gt;</code>.
+        </div>
+      </div>
+
       {/* Header and Launcher */}
       <div className="rounded-xl border border-border bg-slate-900/80 p-6 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-border">
