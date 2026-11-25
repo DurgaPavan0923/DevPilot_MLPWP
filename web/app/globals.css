@@ -15,6 +15,8 @@
   --muted-foreground: #4b5563;
   --accent: #0284c7;
   --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
 }
 
 .dark {
@@ -30,6 +32,8 @@
   --muted-foreground: #94a3b8;
   --accent: #38bdf8;
   --accent-foreground: #0f172a;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
 }
 
 body {

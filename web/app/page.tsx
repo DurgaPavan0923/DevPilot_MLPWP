@@ -217,7 +217,7 @@ export default function HomePage() {
       </section>
 
       {/* Main Grid: Launcher + Recent Sessions */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Launcher Form */}
         <div className="lg:col-span-5 rounded-md border border-border bg-card p-5 space-y-4">
           <div className="flex items-center space-x-2 pb-3 border-b border-border">
@@ -345,7 +345,7 @@ export default function HomePage() {
         </div>
 
         {/* Recent Sessions Table */}
-        <div className="lg:col-span-7 rounded-md border border-border bg-card p-5 flex flex-col justify-between">
+        <div className="lg:col-span-7 rounded-md border border-border bg-card p-5 flex flex-col">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-border mb-4">
               <div className="flex items-center space-x-2">
@@ -389,7 +389,7 @@ export default function HomePage() {
                                 ? "bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30 animate-pulse"
                                 : s.status === "PAUSED"
                                 ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30"
-                                : "bg-destructive/15 text-destructive border border-destructive/30"
+                                : "bg-red-500/15 text-red-700 dark:text-red-300 border border-red-500/30"
                             }`}
                           >
                             {s.status === "COMPLETED" && <CheckCircle2 className="h-3 w-3" />}
@@ -423,7 +423,7 @@ export default function HomePage() {
             )}
           </div>
 
-          <div className="pt-4 border-t border-border flex justify-between items-center text-xs text-muted-foreground">
+          <div className="mt-4 pt-4 border-t border-border flex justify-between items-center text-xs text-muted-foreground">
             <span>Powered by SQLite persistent SessionStore</span>
             <Link href="/eval" className="text-primary hover:underline">
               Evaluation Lab →

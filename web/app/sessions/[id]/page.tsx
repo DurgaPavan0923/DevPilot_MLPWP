@@ -18,6 +18,7 @@ import {
 import { Stepper, type FSMState } from "@/components/Stepper";
 import { DiffViewer } from "@/components/DiffViewer";
 import {
+  MOCK_SESSIONS,
   MOCK_EVENT_STREAM,
   MOCK_DIFF_ORIGINAL,
   MOCK_DIFF_MODIFIED,
@@ -30,6 +31,8 @@ import { formatUSD, formatNumber } from "@/lib/utils";
 export default function LiveSessionPage() {
   const params = useParams();
   const sessionId = (params?.id as string) || "sess_demo_alpha_92";
+  const sessionMeta = MOCK_SESSIONS.find((s) => s.id === sessionId);
+  const taskTitle = sessionMeta?.task || "Autonomous code repair and verification task";
 
   // Event stream state
   const [events, setEvents] = useState<MockAgentEvent[]>([]);
@@ -53,14 +56,31 @@ export default function LiveSessionPage() {
 
   useEffect(() => {
     setEvents(MOCK_EVENT_STREAM);
-    setFsmState("DONE");
-    setSessionStatus("COMPLETED");
+    if (sessionMeta) {
+      setSessionStatus(sessionMeta.status);
+      if (sessionMeta.status === "COMPLETED") {
+        setFsmState("DONE");
+        setRecoveriesCount(0);
+      } else if (sessionMeta.status === "FAILED") {
+        setFsmState("FAILED");
+        setRecoveriesCount(3);
+      } else if (sessionMeta.status === "RUNNING") {
+        setFsmState("ACT");
+        setRecoveriesCount(1);
+      } else if (sessionMeta.status === "PAUSED") {
+        setFsmState("PLAN");
+        setRecoveriesCount(0);
+      }
+    } else {
+      setFsmState("DONE");
+      setSessionStatus("COMPLETED");
+    }
 
     fetchSessionDiff(sessionId).then((d) => {
       setDiffOriginal(d.original);
       setDiffModified(d.modified);
     });
-  }, [sessionId]);
+  }, [sessionId, sessionMeta]);
 
   useEffect(() => {
     feedEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -79,24 +99,25 @@ export default function LiveSessionPage() {
     return true;
   });
 
-  // Dynamic token accounting derived directly from event stream content
-  const promptTokens = events.reduce((sum, evt) => {
+  // Dynamic token accounting derived directly from event stream or mock metadata
+  const streamPromptTokens = events.reduce((sum, evt) => {
     if (evt.type === "THOUGHT" && evt.data.thought) {
       return sum + Math.round(evt.data.thought.length / 3.5);
     }
     return sum;
   }, 1280);
 
-  const completionTokens = events.reduce((sum, evt) => {
+  const streamCompletionTokens = events.reduce((sum, evt) => {
     if (evt.type === "TOOL_RESULT" && evt.data.output) {
       return sum + Math.round(evt.data.output.length / 4.0);
     }
     return sum;
   }, 412);
 
-  const totalTokens = promptTokens + completionTokens;
-  // Estimated cost at $0.14 per 1M prompt tokens and $0.28 per 1M completion tokens (DeepSeek-Coder rates)
-  const totalCostUSD = (promptTokens * 0.14 + completionTokens * 0.28) / 1_000_000;
+  const totalTokens = sessionMeta ? sessionMeta.total_tokens : streamPromptTokens + streamCompletionTokens;
+  const promptTokens = sessionMeta ? Math.round(sessionMeta.total_tokens * 0.75) : streamPromptTokens;
+  const completionTokens = sessionMeta ? sessionMeta.total_tokens - promptTokens : streamCompletionTokens;
+  const totalCostUSD = sessionMeta ? sessionMeta.total_cost_usd : (promptTokens * 0.14 + completionTokens * 0.28) / 1_000_000;
 
   const handlePause = async () => {
     setSessionStatus("PAUSED");
@@ -146,14 +167,16 @@ export default function LiveSessionPage() {
                   ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30"
                   : sessionStatus === "RUNNING"
                   ? "bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30 animate-pulse"
-                  : "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30"
+                  : sessionStatus === "PAUSED"
+                  ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30"
+                  : "bg-red-500/15 text-red-700 dark:text-red-300 border border-red-500/30"
               }`}
             >
               {sessionStatus}
             </span>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Fix ZeroDivisionError when calculating average order value with empty cart items
+            {taskTitle}
           </p>
         </div>
 
