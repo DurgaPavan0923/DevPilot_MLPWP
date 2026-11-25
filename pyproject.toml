@@ -31,6 +31,8 @@ dev = [
     "ruff>=0.4.0",
     "mypy>=1.10.0",
     "pre-commit>=3.7.0",
+    "types-PyYAML>=6.0.12",
+    "types-docker>=7.1.0",
 ]
 full = [
     "fastapi>=0.111.0",
@@ -64,6 +66,14 @@ warn_unused_configs = true
 disallow_untyped_defs = true
 plugins = ["pydantic.mypy"]
 mypy_path = "."
+
+[[tool.mypy.overrides]]
+module = [
+    "docker",
+    "sentence_transformers",
+    "yaml",
+]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

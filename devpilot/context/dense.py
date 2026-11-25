@@ -16,7 +16,7 @@ logger = get_logger("devpilot.context.dense")
 
 # Attempt importing sentence_transformers
 try:
-    from sentence_transformers import SentenceTransformer  # type: ignore[import-not-found]
+    from sentence_transformers import SentenceTransformer
 
     _HAS_SENTENCE_TRANSFORMERS = True
 except ImportError:

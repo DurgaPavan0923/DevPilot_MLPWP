@@ -56,7 +56,7 @@ class DockerExecutor:
         try:
             import docker
 
-            client = docker.from_env()  # type: ignore[attr-defined]
+            client = docker.from_env()
             client.ping()
             return True
         except Exception:
@@ -99,7 +99,7 @@ class DockerExecutor:
 
         import docker
 
-        client = docker.from_env()  # type: ignore[attr-defined]
+        client = docker.from_env()
         cmd_str = command if isinstance(command, str) else " ".join(command)
 
         volumes = {
