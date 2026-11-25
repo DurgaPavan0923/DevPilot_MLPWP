@@ -1,19 +1,20 @@
 # Root .vercelignore for DevPilot
-# Excludes backend, tests, docker, evaluation engines, and large weights to ensure frontend-only deploys never exceed bundle limits.
+# Excludes root backend, tests, docker, evaluation engines, and large weights to ensure frontend-only deploys never exceed bundle limits.
+# Note: leading slashes ensure that nested directories such as web/app/eval and web/app/docs are NOT excluded.
 
-devpilot/
-eval/
-tests/
-docker/
-notebooks/
-results/
-output_images/
-scripts/
-docs/
-eval_repos/
+/devpilot/
+/eval/
+/tests/
+/docker/
+/notebooks/
+/results/
+/output_images/
+/scripts/
+/docs/
+/eval_repos/
 
 # Python virtual environment and caches
-.venv/
+/.venv/
 __pycache__/
 *.py[cod]
 
@@ -23,7 +24,7 @@ __pycache__/
 *.safetensors
 *.db
 *.sqlite3
-.devpilot/
+/.devpilot/
 
 # OS and logs
 *.log

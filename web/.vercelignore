@@ -1,0 +1,7 @@
+# Vercel ignore for web app
+node_modules/
+.next/
+.turbo/
+*.log
+.DS_Store
+Thumbs.db
