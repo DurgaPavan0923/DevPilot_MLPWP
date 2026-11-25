@@ -1,12 +1,12 @@
-# DevPilot Evaluation & Statistical Benchmarking Framework
+# DevPilot Evaluation and Statistical Benchmarking Framework
 
-The `eval/` package provides a rigorous, publication-grade comparative evaluation harness designed to empirically evaluate the core research question:
+The `eval/` package provides a reproducible comparative evaluation harness designed to empirically evaluate the core research question:
 
 > **Research Question:** *Do adaptive repository-aware context retrieval and structured execution feedback improve the reliability, precision, and efficiency of autonomous coding agents on real software repositories?*
 
 ---
 
-## 1. Architecture & Design
+## 1. Architecture and Design
 
 The evaluation framework operates completely decoupled from the agent runtime and backend server. It systematically evaluates coding agent performance across three controlled experimental configurations on identical task distributions and random seeds.
 
@@ -24,7 +24,7 @@ The evaluation framework operates completely decoupled from the agent runtime an
 |  Experiment Runner (eval/runner.py)                                           |
 |  - Parallel execution worker pool with semaphore concurrency control          |
 |  - Isolated tempdir repository checkouts per trial                            |
-|  - Result caching (eval_results_cache.json) to eliminate duplicate LLM calls |
+|  - Result caching (results/eval_results_cache.json) to eliminate duplicate calls|
 |  - Per-task cost caps and wall-clock timeouts                                 |
 +-------------------------------------------------------------------------------+
                                       |
@@ -41,9 +41,9 @@ The evaluation framework operates completely decoupled from the agent runtime an
                                       v
 +-------------------------------------------------------------------------------+
 | Publication Exporters (eval/export.py)                                        |
-| - IEEE / ACM camera-ready LaTeX tables (\begin{table*} ... \end{table*})     |
-| - Raw CSV trial exports (eval/results/results_summary.csv)                    |
-| - Publication vector SVG figures (Resolve rate bar charts, P@K vs R@K curves) |
+| - IEEE camera-ready LaTeX tables (\begin{table*} ... \end{table*})            |
+| - Raw CSV trial exports (results/results_summary.csv)                         |
+| - Publication vector SVG figures (output_images/resolve_rate_comparison.svg)  |
 +-------------------------------------------------------------------------------+
 ```
 
@@ -63,14 +63,14 @@ Every evaluation experiment executes across three controlled agent configuration
 
 ## 3. Statistical Testing Methodology
 
-To guarantee scientific reproducibility and defend against stochastic noise in LLM evaluations, the framework incorporates two formal non-parametric hypothesis tests:
+To guarantee scientific reproducibility and defend against stochastic noise in LLM evaluations, the framework incorporates formal non-parametric hypothesis tests:
 
 1. **Paired McNemar Test**:
-   Evaluates paired binary outcomes ($X_{i, \text{Full}} \in \{0, 1\}$ vs $X_{i, \text{Other}} \in \{0, 1\}$) on identical task instances and seeds. Calculates exact binomial $p$-values when discordant pairs $b + c < 25$, and continuity-corrected $\chi^2$ statistics for larger sample sizes:
+   Evaluates paired binary outcomes on identical task instances and seeds. Calculates exact binomial p-values when discordant pairs $b + c < 25$, and continuity-corrected $\chi^2$ statistics for larger sample sizes:
    $$\chi^2 = \frac{(|b - c| - 1)^2}{b + c}$$
 
 2. **Holm-Bonferroni Multiplicity Correction**:
-   Controls the Family-Wise Error Rate ($\text{FWER} \le 0.05$) across all pairwise comparisons ($\text{Full vs Basic}$, $\text{Full vs Fixed-RAG}$, $\text{Fixed-RAG vs Basic}$).
+   Controls the Family-Wise Error Rate ($\text{FWER} \le 0.05$) across all pairwise comparisons (Full vs Basic, Full vs Fixed-RAG, Fixed-RAG vs Basic).
 
 3. **Non-Parametric Bootstrap Confidence Intervals**:
    Computes 95% confidence intervals on $\Delta \text{Resolve Rate}$ using $B = 10{,}000$ bootstrap resamples with replacement.
@@ -115,9 +115,9 @@ devpilot eval --suite builtin --seeds 42,137,2026 --concurrency 4
 
 ## 5. Generated Artifacts
 
-Results are automatically saved to `eval/results/`:
-- `latest_evaluation_report.json`: Complete machine-readable trial records, raw outputs, and test statistics.
-- `ieee_results_table.tex`: Ready-to-paste LaTeX table for academic manuscripts.
-- `results_summary.csv`: Tabular spreadsheet for Pandas / R data analysis.
-- `resolve_rate_comparison.svg`: Vector graphic bar chart of resolve rates by configuration.
-- `precision_recall_tradeoff.svg`: Precision@K versus Recall@K Pareto curve.
+Results are automatically saved to `results/` and `output_images/`:
+- `results/latest_evaluation_report.json`: Complete machine-readable trial records, raw outputs, and test statistics.
+- `results/ieee_results_table.tex`: Ready-to-paste LaTeX table for academic manuscripts.
+- `results/results_summary.csv`: Tabular spreadsheet for Pandas or R data analysis.
+- `output_images/resolve_rate_comparison.svg`: Vector graphic bar chart of resolve rates by configuration.
+- `output_images/precision_recall_tradeoff.svg`: Precision@K versus Recall@K Pareto curve.

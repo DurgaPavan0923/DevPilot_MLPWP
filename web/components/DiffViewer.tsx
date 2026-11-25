@@ -10,7 +10,7 @@ const DiffEditor = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-96 w-full items-center justify-center bg-slate-950 font-mono text-sm text-slate-500">
+      <div className="flex h-96 w-full items-center justify-center bg-card font-mono text-sm text-muted-foreground">
         Loading Monaco Diff Editor...
       </div>
     ),
@@ -39,20 +39,20 @@ export function DiffViewer({
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-slate-950">
-      <div className="flex items-center justify-between border-b border-border bg-slate-900 px-4 py-2 text-xs">
+    <div className="flex h-full flex-col overflow-hidden rounded-md border border-border bg-card">
+      <div className="flex items-center justify-between border-b border-border bg-muted/40 px-4 py-2 text-xs">
         <div className="flex items-center space-x-2">
-          <FileCode2 className="h-4 w-4 text-blue-400" />
-          <span className="font-mono font-medium text-slate-200">{filename}</span>
-          <span className="rounded bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-400 uppercase">
+          <FileCode2 className="h-4 w-4 text-primary" />
+          <span className="font-mono font-medium text-foreground">{filename}</span>
+          <span className="rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground uppercase">
             {language}
           </span>
         </div>
         <button
           onClick={handleCopy}
-          className="flex items-center space-x-1 rounded bg-slate-800 px-2 py-1 text-slate-300 hover:bg-slate-700 transition"
+          className="flex items-center space-x-1 rounded-md border border-border bg-background px-2.5 py-1 text-xs text-foreground hover:bg-muted transition"
         >
-          {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+          {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
           <span>{copied ? "Copied" : "Copy Patch"}</span>
         </button>
       </div>

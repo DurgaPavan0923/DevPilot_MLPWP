@@ -53,6 +53,11 @@ htmlcov/
 .devpilot/
 eval_repos/
 eval/results/
+eval_results_cache.json
+results/eval_results_cache.json
+eval_DP-*
+eval_*_s*
+*.nbconvert.ipynb
 *.log
 
 # Node.js

@@ -110,6 +110,16 @@ export async function fetchSessionDiff(sessionId: string): Promise<{ original: s
   }
 }
 
-export async function fetchEvalReport(): Promise<typeof MOCK_EVAL_SUMMARY> {
-  return MOCK_EVAL_SUMMARY;
+export async function fetchEvalReport(): Promise<any> {
+  if (isMockMode()) {
+    return MOCK_EVAL_SUMMARY;
+  }
+  try {
+    const res = await fetch(`${API_BASE}/api/eval/latest`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.report || null;
+  } catch {
+    return null;
+  }
 }

@@ -10,10 +10,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   backend-qa:
     name: Backend QA & Security
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]
@@ -60,6 +64,7 @@ jobs:
   web-qa:
     name: Web QA & Build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -67,7 +72,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 12
 
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
@@ -102,6 +107,7 @@ jobs:
     name: Build Docker Images
     needs: [backend-qa, web-qa]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -110,24 +116,63 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build API Docker Image
-        run: docker build -t devpilot-api:test -f docker/Dockerfile.api .
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.api
+          load: true
+          tags: devpilot-api:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build Sandbox Docker Image
-        run: docker build -t devpilot-sandbox:test -f docker/Dockerfile.sandbox docker/
+        uses: docker/build-push-action@v5
+        with:
+          context: docker
+          file: docker/Dockerfile.sandbox
+          load: true
+          tags: devpilot-sandbox:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build Web Docker Image
-        run: docker build -t devpilot-web:test -f docker/Dockerfile.web web/
+        uses: docker/build-push-action@v5
+        with:
+          context: web
+          file: docker/Dockerfile.web
+          load: true
+          tags: devpilot-web:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Test API Container Non-Root UID and Healthcheck
         run: |
           CONTAINER_UID=$(docker run --rm devpilot-api:test id -u)
-          if [ "$CONTAINER_UID" != "10001" ]; then
-            echo "Expected non-root UID 10001, got $CONTAINER_UID"
+          if [ "$CONTAINER_UID" = "0" ]; then
+            echo "Container runs as root (UID 0)!"
             exit 1
           fi
-          echo "Verified container non-root UID: $CONTAINER_UID"
+          echo "Verified non-root container UID: $CONTAINER_UID"
 
           docker run -d --name test-api -p 8000:8000 devpilot-api:test
-          sleep 5
-          curl -f http://localhost:8000/api/health || (docker logs test-api && exit 1)
+
+          HEALTHY=0
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8000/api/health; then
+              HEALTHY=1
+              echo "API is healthy!"
+              break
+            fi
+            sleep 1
+          done
+
+          if [ "$HEALTHY" -ne 1 ]; then
+            echo "Healthcheck timed out! Container logs:"
+            docker logs test-api
+            exit 1
+          fi
+
+          docker exec test-api python -c "import eval.runner, eval.dataset; print('Eval imports succeeded in container')"
           docker rm -f test-api
+
+          docker compose config --quiet

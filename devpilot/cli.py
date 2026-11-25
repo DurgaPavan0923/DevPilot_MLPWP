@@ -217,7 +217,7 @@ def evaluate(
     ),
     seeds: str = typer.Option("42,137,2026", "--seeds", help="Random seeds (comma-separated)"),
     concurrency: int = typer.Option(4, "--concurrency", "-n", help="Parallel trial limit"),
-    output_dir: str = typer.Option("eval/results", "--output", "-o", help="Results directory"),
+    output_dir: str = typer.Option("results", "--output", "-o", help="Results directory"),
 ) -> None:
     """Runs comparative evaluation benchmarks across agent configurations."""
     from devpilot.core.types import AgentConfigPreset
@@ -254,7 +254,7 @@ def evaluate(
     latex_path = out_path / "table_main_results.tex"
     latex_path.write_text(latex, encoding="utf-8")
 
-    figs = generate_evaluation_figures(report, out_path / "figures")
+    figs = generate_evaluation_figures(report, Path("output_images"))
 
     typer.secho("\n[DevPilot Eval] Benchmark Completed:", fg=typer.colors.GREEN, bold=True)
     for p_name, data in report.get("configs", {}).items():

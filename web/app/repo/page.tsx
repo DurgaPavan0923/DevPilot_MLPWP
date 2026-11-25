@@ -8,7 +8,6 @@ import {
   FolderOpen,
   ChevronRight,
   ChevronDown,
-  GitBranch,
   Network,
 } from "lucide-react";
 import { ForceGraph } from "@/components/ForceGraph";
@@ -152,22 +151,22 @@ export default function RepoExplorerPage() {
               <div key={node.path} className="text-xs">
                 <div
                   onClick={() => toggleDir(node.path)}
-                  className="flex items-center space-x-1.5 py-1 px-2 rounded hover:bg-slate-800/60 cursor-pointer select-none text-slate-300"
+                  className="flex items-center space-x-1.5 py-1 px-2 rounded-md hover:bg-muted cursor-pointer select-none text-foreground"
                 >
                   {isOpen ? (
-                    <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
+                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                   ) : (
-                    <ChevronRight className="h-3.5 w-3.5 text-slate-500" />
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
                   )}
                   {isOpen ? (
-                    <FolderOpen className="h-3.5 w-3.5 text-amber-400" />
+                    <FolderOpen className="h-3.5 w-3.5 text-primary" />
                   ) : (
-                    <Folder className="h-3.5 w-3.5 text-amber-400" />
+                    <Folder className="h-3.5 w-3.5 text-primary" />
                   )}
                   <span className="font-mono">{node.name}</span>
                 </div>
                 {isOpen && node.children && (
-                  <div className="pl-4 border-l border-slate-800/80 ml-3">
+                  <div className="pl-4 border-l border-border ml-3">
                     {renderTree(node.children)}
                   </div>
                 )}
@@ -183,18 +182,18 @@ export default function RepoExplorerPage() {
                 setSelectedFile(node.path);
                 setActiveTab("code");
               }}
-              className={`flex items-center justify-between py-1 px-2 rounded cursor-pointer text-xs transition ${
+              className={`flex items-center justify-between py-1 px-2 rounded-md cursor-pointer text-xs transition ${
                 isSelected
-                  ? "bg-blue-600/30 text-blue-300 font-semibold"
-                  : "text-slate-400 hover:bg-slate-800/40 hover:text-slate-200"
+                  ? "bg-primary/10 text-primary font-semibold"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
               <div className="flex items-center space-x-1.5">
-                <FileCode className="h-3.5 w-3.5 text-slate-500" />
+                <FileCode className="h-3.5 w-3.5 text-muted-foreground" />
                 <span className="font-mono">{node.name}</span>
               </div>
               {node.status === "modified" && (
-                <span className="text-[10px] text-amber-400 font-mono font-bold">M</span>
+                <span className="text-[10px] text-amber-500 font-mono font-bold">M</span>
               )}
             </div>
           );
@@ -210,13 +209,13 @@ export default function RepoExplorerPage() {
   return (
     <div className="space-y-6">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-border bg-slate-900/80 p-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-md border border-border bg-card p-4">
         <div>
           <div className="flex items-center space-x-2">
-            <FolderGit2 className="h-5 w-5 text-blue-400" />
-            <h1 className="text-base font-bold text-white">Repository Explorer & Call Graph</h1>
+            <FolderGit2 className="h-5 w-5 text-primary" />
+            <h1 className="text-base font-bold text-foreground">Repository Explorer and Call Graph</h1>
           </div>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-muted-foreground">
             Tree-sitter AST symbol extraction, git status indexing, and directed import dependency graph.
           </p>
         </div>
@@ -224,10 +223,10 @@ export default function RepoExplorerPage() {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setActiveTab("graph")}
-            className={`flex items-center space-x-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+            className={`flex items-center space-x-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition ${
               activeTab === "graph"
-                ? "bg-blue-600 text-white font-bold"
-                : "border border-border bg-slate-800 text-slate-300 hover:bg-slate-700"
+                ? "bg-primary text-primary-foreground font-bold"
+                : "border border-border bg-background text-muted-foreground hover:text-foreground hover:bg-muted"
             }`}
           >
             <Network className="h-3.5 w-3.5" />
@@ -235,10 +234,10 @@ export default function RepoExplorerPage() {
           </button>
           <button
             onClick={() => setActiveTab("code")}
-            className={`flex items-center space-x-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+            className={`flex items-center space-x-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition ${
               activeTab === "code"
-                ? "bg-blue-600 text-white font-bold"
-                : "border border-border bg-slate-800 text-slate-300 hover:bg-slate-700"
+                ? "bg-primary text-primary-foreground font-bold"
+                : "border border-border bg-background text-muted-foreground hover:text-foreground hover:bg-muted"
             }`}
           >
             <FileCode className="h-3.5 w-3.5" />
@@ -250,33 +249,33 @@ export default function RepoExplorerPage() {
       {/* Main Grid: Tree + Explorer View */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[620px]">
         {/* Left: File Tree */}
-        <div className="lg:col-span-4 rounded-xl border border-border bg-slate-900/80 p-4 shadow-sm flex flex-col justify-between">
+        <div className="lg:col-span-4 rounded-md border border-border bg-card p-4 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-border mb-3">
-              <span className="text-xs font-bold text-slate-300">Repository Files</span>
-              <span className="text-[11px] text-slate-500 font-mono">main branch</span>
+              <span className="text-xs font-bold text-foreground">Repository Files</span>
+              <span className="text-[11px] text-muted-foreground font-mono">main branch</span>
             </div>
             <div className="overflow-y-auto max-h-[520px]">{renderTree(SAMPLE_TREE)}</div>
           </div>
-          <div className="pt-3 border-t border-border text-[11px] text-slate-500 flex items-center justify-between">
+          <div className="pt-3 border-t border-border text-[11px] text-muted-foreground flex items-center justify-between">
             <span>Git Tracked</span>
-            <span className="text-amber-400">1 Modified</span>
+            <span className="text-amber-500 font-medium">1 Modified</span>
           </div>
         </div>
 
         {/* Right: Code Viewer or Dependency Graph */}
-        <div className="lg:col-span-8 rounded-xl border border-border bg-slate-900/80 overflow-hidden shadow-sm flex flex-col">
+        <div className="lg:col-span-8 rounded-md border border-border bg-card overflow-hidden flex flex-col">
           {activeTab === "graph" ? (
             <ForceGraph />
           ) : (
-            <div className="flex flex-col h-full bg-slate-950">
-              <div className="flex items-center justify-between border-b border-border bg-slate-900 px-4 py-2.5 text-xs">
-                <span className="font-mono text-slate-300 font-bold">{selectedFile}</span>
-                <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] text-slate-400">
+            <div className="flex flex-col h-full bg-card">
+              <div className="flex items-center justify-between border-b border-border bg-muted/40 px-4 py-2.5 text-xs">
+                <span className="font-mono text-foreground font-bold">{selectedFile}</span>
+                <span className="rounded border border-border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
                   python
                 </span>
               </div>
-              <pre className="flex-1 p-4 font-mono text-xs text-slate-300 overflow-x-auto leading-relaxed bg-[#070b14]">
+              <pre className="flex-1 p-4 font-mono text-xs text-foreground overflow-x-auto leading-relaxed bg-muted/20">
                 {previewCode}
               </pre>
             </div>

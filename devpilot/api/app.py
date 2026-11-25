@@ -506,7 +506,7 @@ async def launch_eval_run(
             tasks = tasks[: req.limit]
         runner = ExperimentRunner(
             workspace_dir=Path("."),
-            results_dir=Path("eval/results"),
+            results_dir=Path("results"),
             seeds=req.seeds,
             max_concurrency=req.concurrency,
         )
@@ -555,7 +555,7 @@ async def export_eval_csv(run_id: str) -> PlainTextResponse:
 
 @app.get("/api/eval/latest", dependencies=[Depends(verify_auth)])
 async def get_latest_eval_report() -> dict[str, Any]:
-    report_file = Path("eval/results/latest_evaluation_report.json")
+    report_file = Path("results/latest_evaluation_report.json")
     if not report_file.exists():
         return {"report": None, "message": "No evaluation runs recorded yet"}
     try:

@@ -8,7 +8,7 @@ import tempfile
 import time
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from devpilot.agent.runtime import AgentRuntime
 from devpilot.core.logging import get_logger
@@ -81,7 +81,7 @@ class ExperimentRunner:
 
         if self.enable_cache and cache_key in self._cache:
             logger.info("eval_task_cache_hit", key=cache_key)
-            return self._cache[cache_key]
+            return cast(dict[str, Any], self._cache[cache_key])
 
         start_time = time.monotonic()
         temp_dir = Path(tempfile.mkdtemp(prefix=f"eval_{task.task_id}_{preset.value}_{seed}_"))

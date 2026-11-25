@@ -1,0 +1,70 @@
+{
+  "timestamp": "2026-11-25T03:09:22.983882+00:00",
+  "total_tasks": 1,
+  "seeds": [
+    42
+  ],
+  "configs": {
+    "basic": {
+      "task_count": 1,
+      "completion_rate": 1.0,
+      "test_pass_rate": 0.0,
+      "avg_precision_at_k": 0.0,
+      "avg_recall_at_k": 0.0,
+      "recovery_success_rate": 1.0,
+      "avg_steps": 1.0,
+      "avg_tokens": 308.0,
+      "avg_cost_usd": 0.0,
+      "avg_duration_sec": 1.76,
+      "bootstrap_ci": {
+        "precision_at_k": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "recall_at_k": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "steps": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "tokens": [
+          308.0,
+          308.0,
+          308.0
+        ]
+      }
+    }
+  },
+  "statistical_comparisons": {},
+  "raw_records": {
+    "basic": [
+      {
+        "task_id": "DP-001",
+        "repo": "task_01_auth_ttl",
+        "preset": "basic",
+        "seed": 42,
+        "model": "mock-eval-model",
+        "status": "COMPLETED",
+        "tests_passed": false,
+        "verification_status": "FAILED",
+        "test_stdout": "============================= test session starts =============================\r\nplatform win32 -- Python 3.14.10, pytest-9.2.0, pluggy-1.7.0\r\nrootdir: C:\\Users\\Pavan kumar\\AppData\\Local\\Temp\\eval_DP-001_basic_42_s_mzr2bp\r\nplugins: anyio-4.16.0, platformdirs-4.14.8, asyncio-1.5.0, cov-7.1.0\r\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\r\ncollected 1 item\r\n\r\ntests\\test_jwt.py F                                             ",
+        "steps": 1,
+        "total_tokens": 308,
+        "total_cost_usd": 0.0,
+        "duration_sec": 1.76,
+        "recoveries_count": 0,
+        "precision_at_k": 0.0,
+        "recall_at_k": 0.0,
+        "modified_files": [],
+        "gold_files": [
+          "src/jwt_helper.py"
+        ]
+      }
+    ]
+  }
+}

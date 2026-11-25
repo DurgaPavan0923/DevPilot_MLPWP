@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Network, Search, ZoomIn, ZoomOut, Filter } from "lucide-react";
+import { Network, Search } from "lucide-react";
 
 interface Node {
   id: string;
@@ -59,25 +59,24 @@ export function ForceGraph() {
   );
 
   return (
-    <div className="flex flex-col lg:flex-row h-[620px] rounded-xl border border-border bg-slate-950 overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-[620px] rounded-md border border-border bg-card overflow-hidden">
       {/* Canvas View */}
-      <div className="relative flex-1 bg-[#070b14] p-4 flex flex-col">
-        <div className="absolute top-4 left-4 z-10 flex items-center space-x-2 bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-1.5 backdrop-blur-md">
-          <Search className="h-4 w-4 text-slate-400" />
+      <div className="relative flex-1 bg-muted/10 p-4 flex flex-col">
+        <div className="absolute top-4 left-4 z-10 flex items-center space-x-2 bg-card/90 border border-border rounded-md px-3 py-1.5 shadow-sm">
+          <Search className="h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Filter nodes..."
             value={filterQuery}
             onChange={(e) => setFilterQuery(e.target.value)}
-            className="bg-transparent text-xs text-slate-200 placeholder-slate-500 focus:outline-none w-48"
+            className="bg-transparent text-xs text-foreground placeholder:text-muted-foreground focus:outline-none w-48"
           />
         </div>
 
         <svg className="w-full h-full cursor-crosshair">
-          {/* Grid lines */}
           <defs>
             <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
-              <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#131b2e" strokeWidth="0.5" />
+              <path d="M 30 0 L 0 0 0 30" fill="none" stroke="currentColor" className="text-border/40" strokeWidth="0.5" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)" />
@@ -97,7 +96,7 @@ export function ForceGraph() {
                   y1={s.y}
                   x2={t.x}
                   y2={t.y}
-                  stroke={isHighlight ? "#3b82f6" : "#233354"}
+                  stroke={isHighlight ? "#0f766e" : "#94a3b8"}
                   strokeWidth={isHighlight ? 2.5 : 1}
                   strokeDasharray={e.type === "calls" ? "4,4" : undefined}
                 />
@@ -121,20 +120,20 @@ export function ForceGraph() {
                   r={isSelected ? 18 : 12}
                   fill={
                     isSelected
-                      ? "#3b82f6"
+                      ? "#0f766e"
                       : isNeighbor
                       ? "#10b981"
                       : node.type === "adapter"
-                      ? "#8b5cf6"
-                      : "#1e293b"
+                      ? "#0369a1"
+                      : "#64748b"
                   }
-                  stroke={isSelected ? "#93c5fd" : "#334155"}
+                  stroke={isSelected ? "#14b8a6" : "#cbd5e1"}
                   strokeWidth={isSelected ? 3 : 1.5}
                 />
                 <text
                   y={isSelected ? 28 : 22}
                   textAnchor="middle"
-                  className="font-mono text-[10px] fill-slate-300 font-medium select-none pointer-events-none"
+                  className="font-mono text-[10px] fill-foreground font-medium select-none pointer-events-none"
                 >
                   {node.id.split("/").pop()}
                 </text>
@@ -145,37 +144,37 @@ export function ForceGraph() {
       </div>
 
       {/* Node Inspector Panel */}
-      <div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-border bg-slate-900/90 p-4 flex flex-col justify-between">
+      <div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-border bg-card p-4 flex flex-col justify-between">
         <div>
           <div className="flex items-center space-x-2 pb-3 border-b border-border">
-            <Network className="h-4 w-4 text-blue-400" />
-            <h3 className="font-semibold text-sm text-slate-200">Dependency Inspector</h3>
+            <Network className="h-4 w-4 text-primary" />
+            <h3 className="font-semibold text-sm text-foreground">Dependency Inspector</h3>
           </div>
 
           {selectedNodeObj ? (
             <div className="mt-4 space-y-4">
               <div>
-                <span className="text-[11px] font-mono text-slate-400 uppercase">Selected Node</span>
-                <p className="font-mono text-xs text-blue-300 font-bold break-all mt-0.5">
+                <span className="text-[11px] font-mono text-muted-foreground uppercase">Selected Node</span>
+                <p className="font-mono text-xs text-foreground font-bold break-all mt-0.5">
                   {selectedNodeObj.id}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="rounded bg-slate-800/80 p-2">
-                  <span className="text-slate-400 text-[10px] block">Node Type</span>
-                  <span className="font-semibold text-slate-200 capitalize">
+                <div className="rounded-md border border-border bg-muted/40 p-2">
+                  <span className="text-muted-foreground text-[10px] block">Node Type</span>
+                  <span className="font-semibold text-foreground capitalize">
                     {selectedNodeObj.type}
                   </span>
                 </div>
-                <div className="rounded bg-slate-800/80 p-2">
-                  <span className="text-slate-400 text-[10px] block">Degree (In/Out)</span>
-                  <span className="font-semibold text-emerald-400">{selectedNodeObj.degree}</span>
+                <div className="rounded-md border border-border bg-muted/40 p-2">
+                  <span className="text-muted-foreground text-[10px] block">Degree (In/Out)</span>
+                  <span className="font-semibold text-primary">{selectedNodeObj.degree}</span>
                 </div>
               </div>
 
               <div>
-                <span className="text-[11px] font-mono text-slate-400 uppercase">
+                <span className="text-[11px] font-mono text-muted-foreground uppercase">
                   Connected Dependents ({connectedNeighbors.size})
                 </span>
                 <div className="mt-1 space-y-1 max-h-48 overflow-y-auto">
@@ -183,7 +182,7 @@ export function ForceGraph() {
                     <div
                       key={nbr}
                       onClick={() => setSelectedNode(nbr)}
-                      className="cursor-pointer rounded bg-slate-800/40 px-2 py-1 text-xs font-mono text-slate-300 hover:bg-slate-800 hover:text-blue-300 transition"
+                      className="cursor-pointer rounded-md bg-muted/40 px-2 py-1 text-xs font-mono text-muted-foreground hover:bg-muted hover:text-foreground transition"
                     >
                       {nbr}
                     </div>
@@ -192,12 +191,12 @@ export function ForceGraph() {
               </div>
             </div>
           ) : (
-            <p className="mt-6 text-xs text-slate-500">Click a node on the canvas to inspect its dependency relationships.</p>
+            <p className="mt-6 text-xs text-muted-foreground">Click a node on the canvas to inspect its dependency relationships.</p>
           )}
         </div>
 
-        <div className="pt-3 border-t border-border text-[11px] text-slate-500">
-          Tree-sitter AST & Graph expansion engine
+        <div className="pt-3 border-t border-border text-[11px] text-muted-foreground">
+          Tree-sitter AST and Graph expansion engine
         </div>
       </div>
     </div>

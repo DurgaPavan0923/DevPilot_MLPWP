@@ -62,8 +62,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--results-dir",
         type=Path,
-        default=Path("eval/results"),
-        help="Directory to save evaluation reports and export artifacts (default: eval/results).",
+        default=Path("results"),
+        help="Directory to save evaluation reports and export artifacts (default: results).",
     )
     return parser.parse_args()
 
@@ -76,7 +76,7 @@ async def main() -> int:
     model_name = args.model or settings.llm.default_model
 
     print("=" * 76)
-    print(" DevPilot: Autonomous Coding Agent Harness — Reproduction Suite")
+    print(" DevPilot: Autonomous Coding Agent Harness: Reproduction Suite")
     print("=" * 76)
     print(f"Target LLM Provider: {provider_name} (model: {model_name})")
 
@@ -144,7 +144,9 @@ async def main() -> int:
     csv_content = export_csv(report)
     csv_path.write_text(csv_content, encoding="utf-8")
 
-    generated_svgs = generate_evaluation_figures(report, results_dir)
+    figures_dir = Path("output_images")
+    figures_dir.mkdir(parents=True, exist_ok=True)
+    generated_svgs = generate_evaluation_figures(report, figures_dir)
 
     print(f"      -> LaTeX Table: {latex_path}")
     print(f"      -> CSV Dump:    {csv_path}")

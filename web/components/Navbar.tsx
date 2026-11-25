@@ -9,10 +9,10 @@ import {
   BarChart3,
   FolderGit2,
   Terminal,
-  Activity,
+  BookOpen,
+  Code2,
   ToggleLeft,
   ToggleRight,
-  ShieldCheck,
 } from "lucide-react";
 import { fetchHealth, isMockMode, setMockMode } from "@/lib/api";
 
@@ -36,22 +36,24 @@ export function Navbar() {
   };
 
   const navItems = [
-    { name: "Dashboard", href: "/", icon: Layers },
-    { name: "Live Session", href: "/sessions/sess_demo_alpha_92", icon: Terminal },
+    { name: "Home", href: "/", icon: Layers },
+    { name: "Product", href: "/product", icon: Code2 },
+    { name: "Live Session", href: "/sessions", icon: Terminal },
     { name: "Repo Explorer", href: "/repo", icon: FolderGit2 },
     { name: "Evaluation Lab", href: "/eval", icon: BarChart3 },
+    { name: "Docs", href: "/docs", icon: BookOpen },
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center space-x-6">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md shadow-blue-500/20">
-              <Cpu className="h-5 w-5" />
+          <Link href="/" className="flex items-center space-x-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded bg-primary text-primary-foreground">
+              <Cpu className="h-4 w-4" />
             </div>
-            <span className="font-bold text-lg tracking-tight text-white">DevPilot</span>
-            <span className="hidden sm:inline-flex items-center rounded-full bg-blue-950/80 px-2 py-0.5 text-xs font-semibold text-blue-400 border border-blue-800/60">
+            <span className="font-bold text-base tracking-tight text-foreground">DevPilot</span>
+            <span className="hidden sm:inline-flex items-center rounded border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
               Research Harness
             </span>
           </Link>
@@ -60,18 +62,20 @@ export function Navbar() {
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive =
-                item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+                item.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center space-x-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                  className={`flex items-center space-x-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
                     isActive
-                      ? "bg-slate-800 text-blue-400"
-                      : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-3.5 w-3.5" />
                   <span>{item.name}</span>
                 </Link>
               );
@@ -79,29 +83,29 @@ export function Navbar() {
           </nav>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2.5">
           {/* Mock API Toggle */}
           <button
             onClick={handleToggleMock}
             title="Toggle between real FastAPI backend and deterministic mock fixtures"
-            className="flex items-center space-x-1.5 rounded-lg border border-border bg-slate-900/80 px-2.5 py-1 text-xs text-slate-300 hover:border-slate-700 transition"
+            className="flex items-center space-x-1.5 rounded-md border border-border bg-card px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-slate-400 transition"
           >
             {mock ? (
-              <ToggleRight className="h-4 w-4 text-emerald-400" />
+              <ToggleRight className="h-4 w-4 text-emerald-600" />
             ) : (
-              <ToggleLeft className="h-4 w-4 text-slate-500" />
+              <ToggleLeft className="h-4 w-4 text-muted-foreground" />
             )}
-            <span className="font-mono">Mock Mode: {mock ? "ON" : "OFF"}</span>
+            <span className="font-mono text-[11px]">Mock Mode: {mock ? "ON" : "OFF"}</span>
           </button>
 
-          {/* Backend Health Pill */}
-          <div className="flex items-center space-x-1.5 rounded-full border border-border bg-slate-900 px-2.5 py-1 text-xs font-medium">
+          {/* Backend Health Badge */}
+          <div className="flex items-center space-x-1.5 rounded-md border border-border bg-card px-2 py-1 text-xs font-medium">
             <span
               className={`h-2 w-2 rounded-full ${
-                health.status === "healthy" ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+                health.status === "healthy" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
               }`}
             />
-            <span className="text-slate-300 capitalize">{health.status}</span>
+            <span className="text-muted-foreground text-[11px] capitalize">{health.status}</span>
           </div>
         </div>
       </div>

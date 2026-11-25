@@ -1,22 +1,22 @@
 # DevPilot Web Dashboard
 
-The `web/` directory hosts the DevPilot interactive web application—a modern Next.js 15 (App Router) user interface that provides real-time telemetry, live execution event streaming, interactive AST code inspection, side-by-side Monaco diff viewing, and an Evaluation Research Lab.
+The `web/` directory hosts the DevPilot interactive web application: a modern Next.js 15 (App Router) user interface providing real-time telemetry, live execution event streaming, interactive AST code inspection, side-by-side Monaco diff viewing, and an Evaluation Lab.
 
 ---
 
-## 1. Features & Capabilities
+## 1. Features and Capabilities
 
-- **Real-Time Agent Telemetry (`/` & `/sessions/[id]`)**:
-  Connects to DevPilot's FastAPI backend via Server-Sent Events (SSE). Streams the live ReAct reasoning cycle (`ANALYZE` -> `RETRIEVE` -> `PLAN` -> `EXECUTE` -> `RECOVER` -> `VERIFY` -> `DONE`) with step-by-step token counters, duration timers, and tool execution logs.
+- **Real-Time Agent Telemetry (`/` and `/sessions/[id]`)**:
+  Connects to DevPilot's FastAPI backend via Server-Sent Events (SSE). Streams the live ReAct reasoning cycle (`ANALYZE` -> `RETRIEVE` -> `PLAN` -> `ACT` -> `OBSERVE` -> `RECOVER` -> `VERIFY` -> `DONE`) with step-by-step token counters, duration timers, and tool execution logs.
 
 - **Interactive Monaco Code Diff Viewer**:
-  Provides a side-by-side visual diff editor (powered by `@monaco-editor/react`) displaying before/after code modifications made by the agent before committing or verifying patches.
+  Provides a side-by-side visual diff editor (powered by `@monaco-editor/react`) displaying before and after code modifications made by the agent before committing or verifying patches.
 
-- **AST Dependency & Symbol Graph (`/repo`)**:
+- **AST Dependency and Symbol Graph (`/repo`)**:
   Visualizes parsed repository functions, classes, imports, and call relationships extracted by the Tree-sitter and NetworkX analysis engines.
 
-- **Evaluation & Hypothesis Testing Lab (`/eval`)**:
-  Presents comparative benchmark evaluations across the three agent configurations (`Basic`, `Fixed-RAG`, `Full DevPilot`). Dynamically exports camera-ready IEEE LaTeX tables and CSV datasets, and renders McNemar $p$-values and bootstrap confidence intervals.
+- **Evaluation and Hypothesis Testing Lab (`/eval`)**:
+  Presents comparative benchmark evaluations across the three agent configurations (`Basic`, `Fixed-RAG`, `Full DevPilot`). Dynamically exports camera-ready IEEE LaTeX tables and CSV datasets, and renders McNemar p-values and bootstrap confidence intervals.
 
 - **Offline Demonstration Mode**:
   Includes standalone mock fixtures (`lib/mock-data.ts`) allowing the frontend to be fully demonstrated and tested offline without requiring active LLM provider keys or running local backend processes.
@@ -30,8 +30,8 @@ The `web/` directory hosts the DevPilot interactive web application—a modern N
 | **Framework** | Next.js 15.1 (App Router), React 19 |
 | **Language** | TypeScript (Strict mode enabled) |
 | **Styling** | Tailwind CSS, Lucide React icons |
-| **Editors & Visuals** | `@monaco-editor/react` (Monaco Diff Editor), SVG Data Visualizations |
-| **State & Communication** | Native Server-Sent Events (`EventSource`), Fetch API |
+| **Editors and Visuals** | `@monaco-editor/react` (Monaco Diff Editor), SVG Data Visualizations |
+| **State and Communication** | Native Server-Sent Events (`EventSource`), Fetch API |
 | **Package Manager** | `pnpm` (Workspace-ready lockfile) |
 
 ---
@@ -42,11 +42,15 @@ The `web/` directory hosts the DevPilot interactive web application—a modern N
 web/
 ├── app/
 │   ├── layout.tsx         # Root layout with navigation sidebar and health badge
-│   ├── page.tsx           # Dashboard home: active sessions, token metrics, cost ledger
+│   ├── page.tsx           # Home page: concrete hero, 7 components, session launcher
+│   ├── product/page.tsx   # Detailed technical breakdown of 7 harness components
+│   ├── docs/page.tsx      # CLI reference, REST API table, environment variables
+│   ├── privacy/page.tsx   # Privacy policy and local data handling facts
+│   ├── terms/page.tsx     # Terms of service and academic project disclaimer
 │   ├── repo/page.tsx      # Repository explorer, AST symbol tree, and dependency graph
-│   ├── eval/page.tsx      # Comparative evaluation lab & statistical analysis viewer
-│   └── sessions/[id]/     # Live session trace viewer, event logs, and Monaco diff view
-├── components/            # Reusable UI widgets, diff viewer, status pills, and charts
+│   ├── eval/page.tsx      # Comparative evaluation lab and statistical analysis viewer
+│   └── sessions/          # Interactive live session demo and trace viewer
+├── components/            # Reusable UI widgets, diff viewer, status badges, and charts
 ├── lib/
 │   ├── api.ts             # Strongly typed API client connecting to FastAPI backend
 │   ├── mock-data.ts       # Realistic offline demo fixtures and simulated event streams
