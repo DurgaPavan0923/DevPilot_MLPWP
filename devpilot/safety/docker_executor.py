@@ -52,12 +52,16 @@ class DockerExecutor:
         self.allow_host_fallback = allow_host_fallback
 
     def is_docker_available(self) -> bool:
-        """Checks if Docker daemon is responsive."""
+        """Checks if Docker daemon is responsive and the sandbox image exists."""
         try:
             import docker
 
             client = docker.from_env()
             client.ping()
+            try:
+                client.images.get(self.image)
+            except Exception:
+                return False
             return True
         except Exception:
             return False
@@ -74,7 +78,19 @@ class DockerExecutor:
         start_time = time.monotonic()
 
         if self.sandbox_enabled and self.is_docker_available():
-            return await self._execute_in_docker(command, env, timeout, workdir, start_time)
+            result = await self._execute_in_docker(command, env, timeout, workdir, start_time)
+            if (
+                not result.ok
+                and self.allow_host_fallback
+                and "Docker container execution error" in result.output
+            ):
+                logger.warning(
+                    "Docker container execution error; falling back to host subprocess execution",
+                    repo_root=str(self.repo_root),
+                    error=result.output,
+                )
+                return await self._execute_on_host(command, env, timeout, start_time)
+            return result
 
         if not self.allow_host_fallback:
             raise SafetyError(
