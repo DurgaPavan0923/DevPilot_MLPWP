@@ -47,7 +47,7 @@ full = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["devpilot"]
+packages = ["devpilot", "eval"]
 
 [tool.ruff]
 line-length = 100
@@ -63,6 +63,7 @@ strict = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 plugins = ["pydantic.mypy"]
+mypy_path = "."
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

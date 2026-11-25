@@ -45,14 +45,20 @@ jobs:
           ruff format --check devpilot eval tests
 
       - name: Typecheck with Mypy Strict
+        env:
+          PYTHONPATH: .
         run: |
-          mypy --strict devpilot
+          mypy --strict devpilot eval
 
       - name: Run Test Suite with Coverage Gate
+        env:
+          PYTHONPATH: .
         run: |
           pytest --cov=devpilot --cov-report=term-missing --cov-fail-under=80 tests/
 
       - name: Run Smoke Test
+        env:
+          PYTHONPATH: .
         run: |
           python scripts/smoke_test.py
 
@@ -74,10 +80,10 @@ jobs:
         with:
           version: 12
 
-      - name: Set up Node.js 20
+      - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: "pnpm"
           cache-dependency-path: web/pnpm-lock.yaml
 
